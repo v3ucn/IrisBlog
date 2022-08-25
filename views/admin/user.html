@@ -101,16 +101,30 @@
             <table class="gridtable">
 
                 <tr>
-
                     <th>用户id</th>
                     <th>用户名</th>
+                    <th>新密码</th>
                     <th>添加时间</th>
+                    <th>操作</th>
                 </tr>
 
                 <tr v-for="(item,index) in userlist">
                     <td>{{ item.ID }}</td>
                     <td>{{ item.Username }}</td>
+                    <td><input type="password" v-model="newpass[index].value"  /></td>
                     <td>{{ item.CreatedAt }}</td>
+                    <td>
+                        
+                        
+                    <button @click="update(index)">更新密码</button>
+
+                    &nbsp;&nbsp;
+
+                    <button @click="del(index)">删除用户</button>
+                    
+                    
+                    </td>
+                
                 </tr>
 
 
@@ -188,7 +202,9 @@ const App = {
                     //密码
                     password:"",
                     //用户列表
-                    userlist:[]
+                    userlist:[],
+                    //新密码
+                    newpass:[]
                 };
             },
             created: function() {
@@ -200,12 +216,60 @@ const App = {
             },
             methods: {
 
+                del:function(i){
+
+                    var r=confirm("您确定要删除吗?");
+
+                    if (r==true){
+                    
+
+                        this.myaxios("http://localhost:5000/admin/user_action/","delete",{"id":this.userlist[i].ID}).then(data => {
+                        console.log(data)
+                        alert(data.msg);
+                    });
+
+
+                    }
+
+
+                },
+                update:function(i){
+
+                    console.log(this.userlist[i].ID);
+                    console.log(this.newpass[i].value);
+
+                    if(this.newpass[i].value == ""){
+                        alert("新密码不能为空");
+                        return false;
+                    }
+
+                    this.myaxios("http://localhost:5000/admin/user_action/","put",{"id":this.userlist[i].ID,"password":this.newpass[i].value}).then(data => {
+                        console.log(data)
+                        alert(data.msg);
+      });
+
+
+                },
+
                 get_userlist:function(){
 
 
                     this.myaxios("http://localhost:5000/admin/userlist/","get",).then(data => {
         console.log(data)
         this.userlist = data.Value
+
+
+        for(let i=0,l=this.userlist.length;i<l;i++){
+
+            this.newpass.push({"value":""})
+
+        }
+
+        console.log(this.newpass);
+        
+
+
+
       });
 
 
@@ -215,6 +279,7 @@ const App = {
 
                     this.myaxios("http://localhost:5000/admin/user_action/","post",{"username":this.username,"password":this.password}).then(data => {
         console.log(data)
+                        alert(data.msg);
       });
 
                 }
