@@ -2,6 +2,8 @@ package main
 
 import (
 	"IrisBlog/handler"
+	"IrisBlog/mytool"
+
 	"github.com/kataras/iris/v12"
 )
 
@@ -26,6 +28,8 @@ func newApp() *iris.Application {
 
 	app.RegisterView(tmpl)
 
+	app.Use(iris.Compression)
+
 	adminhandler := app.Party("/admin")
 	{
 		adminhandler.Use(iris.Compression)
@@ -36,6 +40,23 @@ func newApp() *iris.Application {
 		adminhandler.Post("/user_action/", handler.Admin_useradd)
 
 	}
+
+	app.Post("/captcha/", mytool.GetCaptchaId)
+	app.Get("/captcha/*/", mytool.GetCaptchaImg)
+
+	// app.Get("/captcha/", func(ctx iris.Context) {
+
+	// 	id := captcha.New()
+
+	// 	//res := captcha.VerifyString(id, "123456")
+
+	// 	//fmt.Println(res)
+
+	// 	captcha.WriteImage(ctx, id, captcha.StdWidth, captcha.StdHeight)
+	// })
+
+	app.Get("/signin/", handler.User_signin)
+	app.Post("/signin/", handler.Signin)
 
 	app.Get("/", func(ctx iris.Context) {
 

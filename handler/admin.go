@@ -84,6 +84,10 @@ func Admin_useradd(ctx iris.Context) {
 
 	db := database.Db()
 
+	defer func() {
+		_ = db.Close()
+	}()
+
 	username := ctx.PostValue("username")
 	password := ctx.PostValue("password")
 
@@ -93,10 +97,6 @@ func Admin_useradd(ctx iris.Context) {
 
 	user := &model.User{Username: username, Password: md5str}
 	res := db.Create(user)
-
-	defer func() {
-		_ = db.Close()
-	}()
 
 	if res.Error != nil {
 
