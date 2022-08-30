@@ -1,0 +1,50 @@
+<script>
+
+var mytoken = localStorage.getItem("token");
+
+
+const myaxios = function (url, type, data = {}) {
+
+return new
+
+    Promise((resolve) => {
+
+        if (type === "get" || type === "delete") {
+
+
+            axios({
+
+                method: type,
+                url: url+"?token="+mytoken,
+                params: data
+            }).then((result) => {
+
+                resolve(result.data);
+
+            });
+
+
+        } else {
+
+            const params = new URLSearchParams();
+            for (var key in data) {
+            params.append(key,data[key]);
+            }
+            axios({
+
+                method: type,
+                url: url+"?token="+mytoken,
+                data:params
+            }).then((result) => {
+
+                resolve(result.data);
+
+            });
+
+        }
+
+    });
+
+}
+
+</script>

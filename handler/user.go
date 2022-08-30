@@ -4,6 +4,7 @@ import (
 	"IrisBlog/database"
 	"IrisBlog/model"
 	"IrisBlog/mytool"
+	"fmt"
 
 	"github.com/dchest/captcha"
 
@@ -54,9 +55,15 @@ func Signin(ctx iris.Context) {
 		return
 
 	}
+
+	token := mytool.GenerateToken(user.ID)
+
+	fmt.Println(token)
+
 	ret["errcode"] = 0
 	ret["msg"] = "登录成功"
 	ret["username"] = user.Username
+	ret["token"] = token
 	ctx.JSON(ret)
 
 }

@@ -5,6 +5,7 @@ import (
 	"IrisBlog/mytool"
 
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/jwt"
 )
 
 func main() {
@@ -30,17 +31,6 @@ func newApp() *iris.Application {
 
 	app.Use(iris.Compression)
 
-	adminhandler := app.Party("/admin")
-	{
-		adminhandler.Use(iris.Compression)
-		adminhandler.Get("/user/", handler.Admin_user_page)
-		adminhandler.Get("/userlist/", handler.Admin_userlist)
-		adminhandler.Delete("/user_action/", handler.Admin_userdel)
-		adminhandler.Put("/user_action/", handler.Admin_userupdate)
-		adminhandler.Post("/user_action/", handler.Admin_useradd)
-
-	}
-
 	app.Post("/captcha/", mytool.GetCaptchaId)
 	app.Get("/captcha/*/", mytool.GetCaptchaImg)
 
@@ -58,12 +48,43 @@ func newApp() *iris.Application {
 	app.Get("/signin/", handler.User_signin)
 	app.Post("/signin/", handler.Signin)
 
-	app.Get("/", func(ctx iris.Context) {
+	// app.Get("/", func(ctx iris.Context) {
 
-		ctx.ViewData("message", "你好，女神")
+	// 	ctx.ViewData("message", "你好，女神")
 
-		ctx.View("index.html")
+	// 	ctx.View("index.html")
+	// })
+
+	verifier := jwt.NewVerifier(jwt.HS256, mytool.SigKey)
+	//verifier.WithDefaultBlocklist()
+
+	verifyMiddleware := verifier.Verify(func() interface{} {
+
+		return new(mytool.PlayLoad)
 	})
+
+	adminhandler := app.Party("/admin")
+	// {
+	// 	adminhandler.Use(iris.Compression)
+	// 	adminhandler.Get("/userlist/", handler.Admin_userlist)
+	// 	adminhandler.Delete("/user_action/", handler.Admin_userdel)
+	// 	adminhandler.Put("/user_action/", handler.Admin_userupdate)
+	// 	adminhandler.Post("/user_action/", handler.Admin_useradd)
+	//adminhandler.Get("/user/", handler.Admin_user_page)
+
+	// }
+
+	adminhandler.Use(verifyMiddleware)
+
+	adminhandler.Get("/userlist/", handler.Admin_userlist)
+	adminhandler.Delete("/user_action/", handler.Admin_userdel)
+	adminhandler.Put("/user_action/", handler.Admin_userupdate)
+	adminhandler.Post("/user_action/", handler.Admin_useradd)
+	adminhandler.Get("/user/", handler.Admin_user_page)
+
+	adminhandler.Get("/logout", mytool.Logout)
+
+	app.Get("/", mytool.TestToken())
 
 	return app
 
